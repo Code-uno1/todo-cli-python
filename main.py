@@ -1,54 +1,119 @@
-print("Welcome to the To-Do List App!")
-print("1. Add a task")
-print("2. View tasks")
-print("3. Delete a task")
-choice = input("Enter your choice (1, 2, or 3): ")
+tick = "\u2714"  # ✔ Tick Mark
+unchecked = "[ ]"
+checked = f"[{tick}]"  # [✔]
 
-if choice == "1":
-    task = input("Enter a task: ")
-    with open("todo.txt", "a") as file:
-        file.write(task + "\n")
-    print(f"Task '{task}' added successfully!")
+def add_task():
+    """Adds a new task to tasks.txt"""
+    task = input("Enter the task: ")
+    with open("tasks.txt", "a") as file:
+        file.write(f"{unchecked} {task}\n")
+    print("Task added successfully!")
 
-elif choice == "2":
+def display_tasks():
+    """Displays tasks in a neat format"""
     try:
-        with open("todo.txt", "r") as file:
+        with open("tasks.txt", "r") as file:
             tasks = file.readlines()
+        
+        if not tasks:
+            print("No tasks available!")
+            return
 
+        print("\n📋 Your Task List:")
+        for index, task in enumerate(tasks, start=1):
+            task = task.strip()
+            icon = "✅" if checked in task else "📌"
+            print(f"{icon} {index}. {task}")
+
+    except FileNotFoundError:
+        print("No tasks found! Add some first.")
+
+def mark_task_done():
+    """Marks a task as completed in tasks.txt"""
+    try:
+        with open("tasks.txt", "r") as file:
+            tasks = file.readlines()
+        
         if not tasks:
             print("No tasks found!")
-        else:
-            print("\nYour Tasks:")
-            for index, task in enumerate(tasks, start=1):
-                print(f"{index}. {task.strip()}")
+            return
 
-    except FileNotFoundError:
-        print("No tasks found!")
+        display_tasks()  # Show tasks before asking
 
-elif choice == "3":
-    try:
-        with open("todo.txt", "r") as file:
-            tasks = file.readlines()
-
-        if not tasks:
-            print("No tasks to delete!")
-        else:
-            print("\nYour Tasks:")
-            for index, task in enumerate(tasks, start=1):
-                print(f"{index}. {task.strip()}")
-
-            task_num = int(input("Enter the task number to delete: ")) - 1
-
+        try:
+            task_num = int(input("\nEnter task number to mark as done: ")) - 1
             if 0 <= task_num < len(tasks):
-                deleted_task = tasks.pop(task_num)  # Remove from list
-                with open("todo.txt", "w") as file:  # Overwrite file
-                    file.writelines(tasks)
-                print(f"Task '{deleted_task.strip()}' deleted successfully!")
+                if checked in tasks[task_num]:
+                    print("Task is already marked as done! ✅")
+                else:
+                    tasks[task_num] = tasks[task_num].replace(unchecked, checked)
+
+                    with open("tasks.txt", "w") as file:
+                        file.writelines(tasks)
+
+                    print("Task marked as done! ✅")
             else:
                 print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number.")
 
     except FileNotFoundError:
-        print("No tasks found!")
+        print("No tasks found! Add some first.")
 
-else:
-    print("Invalid choice! Please enter 1, 2, or 3.")
+def delete_task():
+    """Deletes a task from tasks.txt"""
+    try:
+        with open("tasks.txt", "r") as file:
+            tasks = file.readlines()
+        
+        if not tasks:
+            print("No tasks to delete!")
+            return
+
+        display_tasks()  # Show tasks before asking
+
+        try:
+            task_num = int(input("\nEnter task number to delete: ")) - 1
+            if 0 <= task_num < len(tasks):
+                deleted_task = tasks.pop(task_num)
+
+                with open("tasks.txt", "w") as file:
+                    file.writelines(tasks)
+
+                print(f"Deleted: {deleted_task.strip()}")
+            else:
+                print("Invalid task number!")
+        except ValueError:
+            print("Please enter a valid number.")
+
+    except FileNotFoundError:
+        print("No tasks found! Add some first.")
+
+def menu():
+    """Simple menu for task management"""
+    while True:
+        print("\n📋 To-Do List App")
+        print("1. Add a task")
+        print("2. View tasks")
+        print("3. Mark a task as done")
+        print("4. Delete a task")
+        print("5. Exit")
+        
+        choice = input("Choose an option: ")
+
+        if choice == "1":
+            add_task()
+        elif choice == "2":
+            display_tasks()
+        elif choice == "3":
+            mark_task_done()
+        elif choice == "4":
+            delete_task()
+        elif choice == "5":
+            print("Exiting... 👋")
+            break
+        else:
+            print("Invalid choice! Try again.")
+
+# Call the menu to start the app
+menu()
